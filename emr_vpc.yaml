@@ -1,4 +1,5 @@
-Description:  This template deploys a VPC, with a pair of public and private subnets in 
+Description:
+  This template deploys a VPC, with a pair of public and private subnets in
   one Availability Zone. It deploys an internet gateway, with a default
   route on the public subnet. It deploys a NAT gateway,
   and default routes for it in the private subnet.
@@ -52,7 +53,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [0, !GetAZs ""]
       CidrBlock: !Ref PublicSubnetCIDR
       MapPublicIpOnLaunch: true
       Tags:
@@ -63,7 +64,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 0, !GetAZs  '' ]
+      AvailabilityZone: !Select [0, !GetAZs ""]
       CidrBlock: !Ref PrivateSubnetCIDR
       MapPublicIpOnLaunch: false
       Tags:
@@ -136,21 +137,21 @@ Resources:
           IpProtocol: -1
 
   S3GatewayEndpoint:
-  Type: AWS::EC2::VPCEndpoint
-  Properties:
-    ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
-    VpcId: !Ref VPC
-    RouteTableIds:
-      - !Ref PublicRouteTable
-    PolicyDocument:
-      Version: "2012-10-17"
-      Statement:
-        - Sid: AllowS3Access
-          Effect: Allow
-          Principal: "*"
-          Action:
-            - "s3:*"
-          Resource: "*"
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action:
+              - "s3:*"
+            Resource:
+              - "arn:aws:s3:::*"
+      RouteTableIds:
+        - !Ref PrivateRouteTable
 
 Outputs:
   VPC:
@@ -159,11 +160,11 @@ Outputs:
 
   PublicSubnets:
     Description: A list of the public subnets
-    Value: !Join [ ",", [ !Ref PublicSubnet ]]
+    Value: !Join [",", [!Ref PublicSubnet]]
 
   PrivateSubnets:
     Description: A list of the private subnets
-    Value: !Join [ ",", [ !Ref PrivateSubnet ]]
+    Value: !Join [",", [!Ref PrivateSubnet]]
 
   PublicSubnet:
     Description: A reference to the public subnet in the 1st Availability Zone
